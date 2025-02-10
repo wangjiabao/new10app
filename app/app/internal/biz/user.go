@@ -2,13 +2,9 @@ package biz
 
 import (
 	"context"
-	"crypto/ecdsa"
 	v1 "dhb/app/app/api"
 	"encoding/base64"
 	"fmt"
-	sdk "github.com/BioforestChain/go-bfmeta-wallet-sdk"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"math/rand"
@@ -466,39 +462,6 @@ func randString(n int) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	return string(b)
-}
-
-var sdkClient = sdk.NewBCFWalletSDK()
-var bCFSignUtil = sdkClient.NewBCFSignUtil("b")
-
-func generateKeyBiw(word string) (string, string) {
-	bCFSignUtil_CreateKeypair, _ := bCFSignUtil.CreateKeypair(word)
-	got, _ := bCFSignUtil.GetAddressFromPublicKey(bCFSignUtil_CreateKeypair.PublicKey.StringBuffer, "b")
-	return bCFSignUtil_CreateKeypair.SecretKey.Value, got
-}
-
-func generateKey() (string, string, error) {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		return "", "", err
-	}
-
-	privateKeyBytes := crypto.FromECDSA(privateKey)
-	//fmt.Println(hexutil.Encode(privateKeyBytes)[2:])
-
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		return "", "", nil
-	}
-
-	//publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
-	//fmt.Println(hexutil.Encode(publicKeyBytes)[4:])
-
-	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-	//fmt.Println(address)
-
-	return address, hexutil.Encode(privateKeyBytes)[2:], nil
 }
 
 func (uuc *UserUseCase) UpdateUserRecommend(ctx context.Context, u *User, req *v1.RecommendUpdateRequest) (*v1.RecommendUpdateReply, error) {
