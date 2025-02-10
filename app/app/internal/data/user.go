@@ -27,6 +27,7 @@ type User struct {
 	UpdatedAt       time.Time `gorm:"type:datetime;not null"`
 	IsDelete        int64     `gorm:"type:int;not null"`
 	Out             int64     `gorm:"type:int;not null"`
+	OutRate         int64     `gorm:"type:int;not null"`
 	Lock            int64     `gorm:"type:int;not null"`
 }
 
@@ -602,11 +603,11 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 	user.Address = uc.Address
 	user.Password = uc.Password
 
-	user.AddressTwo = uc.AddressTwo
-	user.PrivateKey = uc.PrivateKey
-	user.AddressThree = uc.AddressThree
-	user.PrivateKeyThree = uc.PrivateKeyThree
-	user.WordThree = uc.WordThree
+	//user.AddressTwo = uc.AddressTwo
+	//user.PrivateKey = uc.PrivateKey
+	//user.AddressThree = uc.AddressThree
+	//user.PrivateKeyThree = uc.PrivateKeyThree
+	//user.WordThree = uc.WordThree
 
 	res := u.data.DB(ctx).Table("user").Create(&user)
 	if res.Error != nil {
@@ -685,7 +686,7 @@ func (ub *UserBalanceRepo) RecommendLocationRewardBiw(ctx context.Context, userI
 	var err error
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", rewardAmount), "recommend_total": gorm.Expr("recommend_location_total + ?", rewardAmount)}).Error; nil != err {
+		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", rewardAmount), "recommend_total": gorm.Expr("recommend_location_total + ?", rewardAmount)}).Error; nil != err {
 		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
@@ -734,10 +735,10 @@ func (ub *UserBalanceRepo) RecommendLocationRewardBiw(ctx context.Context, userI
 	//}
 
 	var userBalanceRecode UserBalanceRecord
-	userBalanceRecode.Balance = userBalance.BalanceDhb
+	userBalanceRecode.Balance = userBalance.BalanceUsdt
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "reward"
-	userBalanceRecode.CoinType = "dhb"
+	userBalanceRecode.CoinType = "usdt"
 	userBalanceRecode.Amount = rewardAmount
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {
@@ -1459,8 +1460,8 @@ func (ub *UserBalanceRepo) Exchange(ctx context.Context, userId int64, amount in
 	//}
 
 	if res := ub.data.DB(ctx).Table("user_balance").
-		Where("user_id=? and balance_dhb>=?", userId, amount).
-		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb - ?", amount), "balance_usdt": gorm.Expr("balance_usdt + ?", amountUsdtSub)}); 0 == res.RowsAffected || nil != res.Error {
+		Where("user_id=? and balance_usdt>=?", userId, amount).
+		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt - ?", amount), "balance_dhb": gorm.Expr("balance_dhb + ?", amountUsdtSub)}); 0 == res.RowsAffected || nil != res.Error {
 		return errors.NotFound("user balance err", "user balance error")
 	}
 
@@ -1474,7 +1475,7 @@ func (ub *UserBalanceRepo) Exchange(ctx context.Context, userId int64, amount in
 	userBalanceRecode.Balance = amount
 	userBalanceRecode.UserId = userBalance.UserId
 	userBalanceRecode.Type = "exchange"
-	userBalanceRecode.CoinType = "dhb"
+	userBalanceRecode.CoinType = "usdt"
 	userBalanceRecode.Amount = amountUsdtSub
 	err = ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode).Error
 	if err != nil {

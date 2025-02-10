@@ -547,7 +547,7 @@ func (lr *LocationRepo) UpdateLocationNewNew(ctx context.Context, id int64, user
 
 		res = lr.data.DB(ctx).Table("user").
 			Where("id=?", userId).
-			Updates(map[string]interface{}{"out": gorm.Expr("out + ?", 1)})
+			Updates(map[string]interface{}{"out_rate": gorm.Expr("out_rate + ?", 1)})
 		if 0 == res.RowsAffected || res.Error != nil {
 			return res.Error
 		}

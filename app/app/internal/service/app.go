@@ -57,28 +57,31 @@ func (a *AppService) EthAuthorize(ctx context.Context, req *v1.EthAuthorizeReque
 	}
 
 	// 验证
-	var (
-		res     bool
-		address string
-		err     error
-	)
-
-	res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
-	if !res || nil != err || 0 >= len(address) || userAddress != address {
-		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
-	}
-
 	//var (
-	//	addressFromSign string
+	//	res bool
+	//	address string
+	//	err error
 	//)
-	//res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
-	//if !res || addressFromSign != userAddress {
+
+	//res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
+	//if !res || nil != err || 0 >= len(address) || userAddress != address {
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	//}
+
+	var (
+		res             bool
+		addressFromSign string
+		err             error
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	if !res || addressFromSign != userAddress {
+		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
+	}
 
 	//if "" == req.SendBody.Password || 6 > len(req.SendBody.Password) {
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "账户密码必须大于6位")
 	//}
+
 	// TODO 验证签名
 	//password := fmt.Sprintf("%x", md5.Sum([]byte(req.SendBody.Password)))
 	password := ""
@@ -180,13 +183,22 @@ func (a *AppService) RecommendUpdate(ctx context.Context, req *v1.RecommendUpdat
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "用户已删除")
 	}
 
-	var (
-		address string
-		res     bool
-	)
+	//var (
+	//	address string
+	//	res     bool
+	//)
+	//
+	//res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
+	//if !res || nil != err || 0 >= len(address) || user.Address != address {
+	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
+	//}
 
-	res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
-	if !res || nil != err || 0 >= len(address) || user.Address != address {
+	var (
+		res             bool
+		addressFromSign string
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
@@ -334,13 +346,22 @@ func (a *AppService) Exchange(ctx context.Context, req *v1.ExchangeRequest) (*v1
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "用户已冻结")
 	}
 
-	var (
-		address string
-		res     bool
-	)
+	//var (
+	//	address string
+	//	res     bool
+	//)
+	//
+	//res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
+	//if !res || nil != err || 0 >= len(address) || user.Address != address {
+	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
+	//}
 
-	res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
-	if !res || nil != err || 0 >= len(address) || user.Address != address {
+	var (
+		res             bool
+		addressFromSign string
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
@@ -371,13 +392,11 @@ func (a *AppService) Buy(ctx context.Context, req *v1.BuyRequest) (*v1.BuyReply,
 
 	// 验证
 	var (
-		res bool
 		err error
 	)
 
 	var (
-		user    *biz.User
-		address string
+		user *biz.User
 	)
 	user, err = a.uuc.GetUserByUserId(ctx, userId)
 	if nil != err {
@@ -393,19 +412,19 @@ func (a *AppService) Buy(ctx context.Context, req *v1.BuyRequest) (*v1.BuyReply,
 	}
 
 	//fmt.Println(user)
-	res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
-	if !res || nil != err || 0 >= len(address) || address != user.Address {
-		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
-	}
-
-	//var (
-	//	res             bool
-	//	addressFromSign string
-	//)
-	//res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
-	//if !res || addressFromSign != user.Address {
+	//res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
+	//if !res || nil != err || 0 >= len(address) || address != user.Address {
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	//}
+
+	var (
+		res             bool
+		addressFromSign string
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	if !res || addressFromSign != user.Address {
+		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
+	}
 
 	//if "" == req.SendBody.Password || 6 > len(req.SendBody.Password) {
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "账户密码必须大于6位")
@@ -453,13 +472,22 @@ func (a *AppService) Withdraw(ctx context.Context, req *v1.WithdrawRequest) (*v1
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "用户已冻结")
 	}
 
-	var (
-		address string
-		res     bool
-	)
+	//var (
+	//	address string
+	//	res     bool
+	//)
+	//
+	//res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
+	//if !res || nil != err || 0 >= len(address) || user.Address != address {
+	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
+	//}
 
-	res, address, err = verifySig2(req.SendBody.Sign, req.SendBody.PublicKey, "login")
-	if !res || nil != err || 0 >= len(address) || user.Address != address {
+	var (
+		res             bool
+		addressFromSign string
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
