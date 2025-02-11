@@ -66,12 +66,23 @@ func (a *AppService) EthAuthorize(ctx context.Context, req *v1.EthAuthorizeReque
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	//}
 
+	// 验证
 	var (
-		res             bool
-		addressFromSign string
-		err             error
+		res bool
+		err error
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	res, err = addressCheck(userAddress)
+	if nil != err {
+		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址验证失败")
+	}
+	if !res {
+		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址格式错误")
+	}
+
+	var (
+		addressFromSign string
+	)
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(userAddress))
 	if !res || addressFromSign != userAddress {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
@@ -195,11 +206,10 @@ func (a *AppService) RecommendUpdate(ctx context.Context, req *v1.RecommendUpdat
 		res             bool
 		addressFromSign string
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
 	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
-
 	return a.uuc.UpdateUserRecommend(ctx, &biz.User{
 		ID: userId,
 	}, req)
@@ -358,7 +368,7 @@ func (a *AppService) Exchange(ctx context.Context, req *v1.ExchangeRequest) (*v1
 		res             bool
 		addressFromSign string
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
 	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
@@ -419,7 +429,7 @@ func (a *AppService) Buy(ctx context.Context, req *v1.BuyRequest) (*v1.BuyReply,
 		res             bool
 		addressFromSign string
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
 	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
@@ -484,7 +494,7 @@ func (a *AppService) Withdraw(ctx context.Context, req *v1.WithdrawRequest) (*v1
 		res             bool
 		addressFromSign string
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte("EthAuthorize"))
+	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
 	if !res || addressFromSign != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
